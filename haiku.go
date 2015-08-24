@@ -14,9 +14,9 @@ var (
 
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
-func isWord(s string) bool {
+func isWord(c []string) bool {
 	for _, f := range []string{"名詞", "動詞", "形容詞", "形容動詞", " 副詞", " 連体詞", " 接続詞", " 感動詞", " 接頭詞", "フィラー"} {
-		if f == s {
+		if f == c[0] && c[1] != "非自立" && c[1] != "接尾" {
 			return true
 		}
 	}
@@ -50,7 +50,7 @@ func Match(text string, rule []int) bool {
 			}
 			return false
 		}
-		if r[pos] == rule[pos] && (!isWord(c[0]) || c[1] == "接尾") {
+		if r[pos] == rule[pos] && !isWord(c) {
 			return false
 		}
 		n := countChars(y)
@@ -96,7 +96,7 @@ func Find(text string, rule []int) []string {
 			copy(r, rule)
 			continue
 		}
-		if r[pos] == rule[pos] && (!isWord(c[0]) || c[1] == "接尾") {
+		if r[pos] == rule[pos] && !isWord(c) {
 			pos = 0
 			sentence = ""
 			copy(r, rule)
