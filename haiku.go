@@ -15,7 +15,7 @@ var (
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
 func isWord(c []string) bool {
-	for _, f := range []string{"名詞", "動詞", "形容詞", "形容動詞", " 副詞", " 連体詞", " 接続詞", " 感動詞", " 接頭詞", "フィラー"} {
+	for _, f := range []string{"名詞", "動詞", "形容詞", "形容動詞", "副詞", "連体詞", "接続詞", "感動詞", "接頭詞", "フィラー"} {
 		if f == c[0] && c[1] != "非自立" && c[1] != "接尾" {
 			return true
 		}
