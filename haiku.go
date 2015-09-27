@@ -3,7 +3,7 @@ package haiku
 import (
 	"regexp"
 
-	"github.com/ikawaha/kagome"
+	"github.com/ikawaha/kagome/tokenizer"
 )
 
 var (
@@ -30,7 +30,7 @@ func countChars(s string) int {
 
 // Match return true when text matches with rule(s).
 func Match(text string, rule []int) bool {
-	t := kagome.NewTokenizer()
+	t := tokenizer.New()
 	text = reIgnoreText.ReplaceAllString(text, "")
 	tokens := t.Tokenize(text)
 	pos := 0
@@ -70,7 +70,7 @@ func Find(text string, rule []int) []string {
 	if len(rule) == 0 {
 		return nil
 	}
-	t := kagome.NewTokenizer()
+	t := tokenizer.New()
 	text = reIgnoreText.ReplaceAllString(text, "")
 	tokens := t.Tokenize(text)
 	pos := 0
