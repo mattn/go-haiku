@@ -2,6 +2,7 @@ package haiku
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/ikawaha/kagome/tokenizer"
 )
@@ -78,6 +79,7 @@ func Find(text string, rule []int) []string {
 	copy(r, rule)
 	sentence := ""
 	start := 0
+	ambigous := 0
 
 	ret := []string{}
 	for i := 0; i < len(tokens); i++ {
@@ -92,25 +94,29 @@ func Find(text string, rule []int) []string {
 				continue
 			}
 			pos = 0
+			ambigous = 0
 			sentence = ""
 			copy(r, rule)
 			continue
 		}
 		if r[pos] == rule[pos] && !isWord(c) {
 			pos = 0
+			ambigous = 0
 			sentence = ""
 			copy(r, rule)
 			continue
 		}
+		ambigous += strings.Count(y, "ッ") + strings.Count(y, "ー")
 		n := countChars(y)
 		r[pos] -= n
 		sentence += tok.Surface
-		if r[pos] == 0 {
+		if r[pos] == 0 || r[pos]+ambigous == 0 {
 			pos++
 			if pos >= len(r) {
 				ret = append(ret, sentence)
 				start = i + 1
 				pos = 0
+				ambigous = 0
 				sentence = ""
 				copy(r, rule)
 				continue
@@ -120,6 +126,7 @@ func Find(text string, rule []int) []string {
 			i = start + 1
 			start++
 			pos = 0
+			ambigous = 0
 			sentence = ""
 			copy(r, rule)
 		}
