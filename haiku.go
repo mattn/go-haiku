@@ -16,10 +16,13 @@ var (
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
 func isWord(c []string) bool {
-	for _, f := range []string{"名詞", "動詞", "形容詞", "形容動詞", "副詞", "連体詞", "接続詞", "感動詞", "接頭詞", "フィラー"} {
+	for _, f := range []string{"名詞", "形容詞", "形容動詞", "副詞", "連体詞", "接続詞", "感動詞", "接頭詞", "フィラー"} {
 		if f == c[0] && c[1] != "非自立" && c[1] != "接尾" {
 			return true
 		}
+	}
+	if c[0] == "動詞" && c[1] != "接尾" {
+		return true
 	}
 	return false
 }
@@ -32,7 +35,7 @@ func countChars(s string) int {
 // Match return true when text matches with rule(s).
 func Match(text string, rule []int) bool {
 	t := tokenizer.New()
-	text = reIgnoreText.ReplaceAllString(text, "")
+	text = reIgnoreText.ReplaceAllString(text, " ")
 	tokens := t.Tokenize(text)
 	pos := 0
 	r := make([]int, len(rule))
@@ -72,7 +75,7 @@ func Find(text string, rule []int) []string {
 		return nil
 	}
 	t := tokenizer.New()
-	text = reIgnoreText.ReplaceAllString(text, "")
+	text = reIgnoreText.ReplaceAllString(text, " ")
 	tokens := t.Tokenize(text)
 	pos := 0
 	r := make([]int, len(rule))
@@ -89,6 +92,9 @@ func Find(text string, rule []int) []string {
 			continue
 		}
 		y := c[len(c)-1]
+		if y == "*" {
+			continue
+		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
 				continue
