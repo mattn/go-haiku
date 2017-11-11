@@ -13,6 +13,10 @@ var (
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
 )
 
+func isEnd(c []string) bool {
+	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用")
+}
+
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
 func isWord(c []string) bool {
@@ -119,8 +123,10 @@ func Find(text string, rule []int) []string {
 		if r[pos] == 0 || r[pos]+ambigous == 0 {
 			pos++
 			if pos >= len(r) {
-				ret = append(ret, sentence)
-				start = i + 1
+				if isEnd(c) {
+					ret = append(ret, sentence)
+					start = i + 1
+				}
 				pos = 0
 				ambigous = 0
 				sentence = ""
