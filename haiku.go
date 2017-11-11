@@ -122,7 +122,7 @@ func Find(text string, rule []int) []string {
 		sentence += tok.Surface
 		if r[pos] == 0 || r[pos]+ambigous == 0 {
 			pos++
-			if pos >= len(r) {
+			if pos == len(r) || pos == len(r)+1 {
 				if isEnd(c) {
 					ret = append(ret, sentence)
 					start = i + 1

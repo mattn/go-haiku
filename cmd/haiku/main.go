@@ -28,6 +28,10 @@ func walk(node *html.Node, buff *bytes.Buffer) {
 		}
 	}
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		switch strings.ToLower(node.Data) {
+		case "script":
+			continue
+		}
 		walk(c, buff)
 	}
 }
