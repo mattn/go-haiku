@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -12,8 +13,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mattn/go-encoding"
 	"github.com/mattn/go-haiku"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/charset"
 )
 
 func walk(node *html.Node, buff *bytes.Buffer) {
@@ -29,9 +32,19 @@ func walk(node *html.Node, buff *bytes.Buffer) {
 	}
 }
 
-func text(reader io.Reader) (string, error) {
+func text(resp *http.Response) (string, error) {
+	br := bufio.NewReader(resp.Body)
+	var r io.Reader = br
+	if data, err := br.Peek(1024); err == nil {
+		if _, name, ok := charset.DetermineEncoding(data, resp.Header.Get("content-type")); ok {
+			if enc := encoding.GetEncoding(name); enc != nil {
+				r = enc.NewDecoder().Reader(br)
+			}
+		}
+	}
+
 	var buffer bytes.Buffer
-	doc, err := html.Parse(reader)
+	doc, err := html.Parse(r)
 	if err != nil {
 		return "", err
 	}
@@ -70,16 +83,16 @@ func main() {
 	}
 	for _, arg := range args {
 		if *u {
-			res, err := http.Get(arg)
+			resp, err := http.Get(arg)
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer res.Body.Close()
-			b, err := ioutil.ReadAll(res.Body)
+			defer resp.Body.Close()
+			s, err := text(resp)
 			if err != nil {
 				log.Fatal(err)
 			}
-			arg = string(b)
+			arg = s
 		}
 		for _, h := range haiku.Find(arg, r) {
 			fmt.Println(h)
