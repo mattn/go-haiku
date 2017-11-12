@@ -97,7 +97,7 @@ func Find(text string, rule []int) []string {
 		}
 		y := c[len(c)-1]
 		if y == "*" {
-			continue
+			y = tok.Surface
 		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
