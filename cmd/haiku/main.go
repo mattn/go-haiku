@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io"
@@ -85,6 +86,8 @@ func main() {
 		}
 		args = []string{string(b)}
 	}
+	http.DefaultTransport.(*http.Transport).TLSNextProto = make(map[string]func(string, *tls.Conn) http.RoundTripper)
+
 	for _, arg := range args {
 		if *u {
 			resp, err := http.Get(arg)
