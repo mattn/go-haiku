@@ -120,7 +120,7 @@ func Find(text string, rule []int) []string {
 		n := countChars(y)
 		r[pos] -= n
 		sentence += tok.Surface
-		if r[pos] == 0 || r[pos]+ambigous == 0 {
+		if r[pos] >= 0 && (r[pos] == 0 || r[pos]+ambigous == 0) {
 			pos++
 			if pos == len(r) || pos == len(r)+1 {
 				if isEnd(c) {
