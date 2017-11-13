@@ -70,7 +70,8 @@ func rules(s string) ([]int, error) {
 }
 
 func main() {
-	u := flag.Bool("u", false, "handle as URL")
+	u := flag.String("u", "", "handle as URL")
+	d := flag.String("d", "", "user dic")
 	rs := flag.String("r", "5,7,5", "rule of match (default: 5,7,5)")
 	flag.Parse()
 
@@ -79,7 +80,7 @@ func main() {
 		flag.Usage()
 	}
 	args := flag.Args()
-	if len(args) == 0 {
+	if len(args) == 0 && *u == "" {
 		b, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			log.Fatal(err)
@@ -88,20 +89,25 @@ func main() {
 	}
 	http.DefaultTransport.(*http.Transport).TLSNextProto = make(map[string]func(string, *tls.Conn) http.RoundTripper)
 
-	for _, arg := range args {
-		if *u {
-			resp, err := http.Get(arg)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer resp.Body.Close()
-			s, err := text(resp)
-			if err != nil {
-				log.Fatal(err)
-			}
-			arg = s
+	if *u != "" {
+		resp, err := http.Get(*u)
+		if err != nil {
+			log.Fatal(err)
 		}
-		for _, h := range haiku.Find(arg, r) {
+		defer resp.Body.Close()
+		s, err := text(resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		args = []string{s}
+	}
+	for _, arg := range args {
+		res, err := haiku.FindWithOpt(arg, r, &haiku.Opt{Udic: *d})
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		for _, h := range res {
 			fmt.Println(h)
 		}
 	}

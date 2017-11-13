@@ -33,6 +33,9 @@ func isWord(c []string) bool {
 	if c[0] == "動詞" && c[1] != "接尾" {
 		return true
 	}
+	if c[0] == "カスタム人名" || c[0] == "カスタム名詞" {
+		return true
+	}
 	return false
 }
 
@@ -78,12 +81,22 @@ func Match(text string, rule []int) bool {
 	return false
 }
 
-// Find returns sentences that text matches with rule(s).
-func Find(text string, rule []int) []string {
+type Opt struct {
+	Udic string
+}
+
+func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	if len(rule) == 0 {
-		return nil
+		return nil, nil
 	}
 	t := tokenizer.New()
+	if opt != nil && opt.Udic != "" {
+		dic, err := tokenizer.NewUserDic(opt.Udic)
+		if err != nil {
+			return nil, err
+		}
+		t.SetUserDic(dic)
+	}
 	text = reIgnoreText.ReplaceAllString(text, " ")
 	tokens := t.Tokenize(text)
 	pos := 0
@@ -168,5 +181,11 @@ func Find(text string, rule []int) []string {
 			copy(r, rule)
 		}
 	}
-	return ret
+	return ret, nil
+}
+
+// Find returns sentences that text matches with rule(s).
+func Find(text string, rule []int) []string {
+	res, _ := FindWithOpt(text, rule, nil)
+	return res
 }
