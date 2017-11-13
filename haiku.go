@@ -11,10 +11,15 @@ var (
 	reWord       = regexp.MustCompile(`^[ァ-ヾ]+$`)
 	reIgnoreText = regexp.MustCompile(`[\[\]「」『』]`)
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
+	reKana       = regexp.MustCompile(`[ァ-タダ-ヶ]`)
 )
 
 func isEnd(c []string) bool {
 	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用")
+}
+
+func isSpace(c []string) bool {
+	return c[1] == "空白"
 }
 
 // isWord return true when the kind of the word is possible to be leading of
@@ -88,11 +93,31 @@ func Find(text string, rule []int) []string {
 	start := 0
 	ambigous := 0
 
+	for i := 0; i < len(tokens); i++ {
+		if reKana.MatchString(tokens[i].Surface) {
+			surface := tokens[i].Surface
+			var j int
+			for j = i + 1; j < len(tokens); j++ {
+				if reKana.MatchString(tokens[j].Surface) {
+					surface += tokens[j].Surface
+				} else {
+					break
+				}
+			}
+			tokens[i].Surface = surface
+			for k := 0; k < (j - i); k++ {
+				tokens[i+1+k] = tokens[j+k]
+			}
+			tokens = tokens[:len(tokens)-(j-i)+1]
+			i = j
+		}
+	}
+
 	ret := []string{}
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
-		if len(c) == 0 {
+		if len(c) == 0 || isSpace(c) {
 			continue
 		}
 		y := c[len(c)-1]
