@@ -15,7 +15,7 @@ var (
 )
 
 func isEnd(c []string) bool {
-	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用")
+	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用") && c[5] != "未然形"
 }
 
 func isSpace(c []string) bool {
