@@ -41,7 +41,10 @@ func text(resp *http.Response) (string, error) {
 	br := bufio.NewReader(resp.Body)
 	var r io.Reader = br
 	if data, err := br.Peek(1024); err == nil {
-		if _, name, ok := charset.DetermineEncoding(data, resp.Header.Get("content-type")); ok {
+		enc, name, _ := charset.DetermineEncoding(data, resp.Header.Get("content-type"))
+		if enc != nil {
+			r = enc.NewDecoder().Reader(br)
+		} else if name != "" {
 			if enc := encoding.GetEncoding(name); enc != nil {
 				r = enc.NewDecoder().Reader(br)
 			}
