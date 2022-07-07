@@ -7,3 +7,5 @@ require (
 	github.com/mattn/go-encoding v0.0.2
 	golang.org/x/net v0.0.0-20210420210106-798c2154c571
 )
+
+require golang.org/x/text v0.3.6 // indirect
