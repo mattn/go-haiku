@@ -61,7 +61,7 @@ func Match(text string, rule []int) bool {
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
-		if len(c) == 0 {
+		if len(c) == 0 || isSpace(c) {
 			continue
 		}
 		y := c[len(c)-1]
