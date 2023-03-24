@@ -4,7 +4,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ikawaha/kagome/tokenizer"
+	"github.com/ikawaha/kagome-dict/dict"
+	"github.com/ikawaha/kagome-dict/ipa"
+	"github.com/ikawaha/kagome/v2/tokenizer"
 )
 
 var (
@@ -46,7 +48,10 @@ func countChars(s string) int {
 
 // Match return true when text matches with rule(s).
 func Match(text string, rule []int) bool {
-	t := tokenizer.New()
+	t, err := tokenizer.New(ipa.Dict(), tokenizer.OmitBosEos())
+	if err != nil {
+		return false
+	}
 	text = reIgnoreText.ReplaceAllString(text, " ")
 	tokens := t.Tokenize(text)
 	pos := 0
@@ -82,20 +87,20 @@ func Match(text string, rule []int) bool {
 }
 
 type Opt struct {
-	Udic string
+	Udic *dict.Dict
 }
 
 func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	if len(rule) == 0 {
 		return nil, nil
 	}
-	t := tokenizer.New()
-	if opt != nil && opt.Udic != "" {
-		dic, err := tokenizer.NewUserDic(opt.Udic)
-		if err != nil {
-			return nil, err
-		}
-		t.SetUserDic(dic)
+	d := opt.Udic
+	if d == nil {
+		d = ipa.Dict()
+	}
+	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
+	if err != nil {
+		return nil, err
 	}
 	text = reIgnoreText.ReplaceAllString(text, " ")
 	tokens := t.Tokenize(text)
