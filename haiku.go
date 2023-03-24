@@ -157,7 +157,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 			copy(r, rule)
 			continue
 		}
-		if r[pos] == rule[pos] && !isWord(c) {
+		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(c)) {
 			pos = 0
 			ambigous = 0
 			sentence = ""
