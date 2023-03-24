@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ikawaha/kagome-dict/dict"
 	"github.com/mattn/go-encoding"
 	"github.com/mattn/go-haiku"
 	"golang.org/x/net/html"
@@ -104,8 +105,12 @@ func main() {
 		}
 		args = []string{s}
 	}
+	dd, err := dict.LoadShrink(*d)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, arg := range args {
-		res, err := haiku.FindWithOpt(arg, r, &haiku.Opt{Udic: *d})
+		res, err := haiku.FindWithOpt(arg, r, &haiku.Opt{Udic: dd})
 		if err != nil {
 			log.Println(err)
 			continue
