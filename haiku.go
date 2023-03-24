@@ -65,20 +65,23 @@ func Match(text string, rule []int) bool {
 			continue
 		}
 		y := c[len(c)-1]
+		if y == "*" {
+			y = tok.Surface
+		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
 				continue
 			}
 			return false
 		}
-		if r[pos] == rule[pos] && !isWord(c) {
+		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(c)) {
 			return false
 		}
 		n := countChars(y)
 		r[pos] -= n
 		if r[pos] == 0 {
 			pos++
-			if pos == len(r) && i == len(tokens)-2 {
+			if pos == len(r) && i == len(tokens)-1 {
 				return true
 			}
 		}
