@@ -32,6 +32,9 @@ func isWord(c []string) bool {
 			return true
 		}
 	}
+	if c[0] == "助詞" && c[1] != "服助詞" {
+		return true
+	}
 	if c[0] == "動詞" && c[1] != "接尾" {
 		return true
 	}

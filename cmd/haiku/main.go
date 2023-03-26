@@ -105,12 +105,17 @@ func main() {
 		}
 		args = []string{s}
 	}
-	dd, err := dict.LoadShrink(*d)
-	if err != nil {
-		log.Fatal(err)
+
+	opt := &haiku.Opt{}
+	if *d != "" {
+		dd, err := dict.LoadShrink(*d)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opt.Udic = dd
 	}
 	for _, arg := range args {
-		res, err := haiku.FindWithOpt(arg, r, &haiku.Opt{Udic: dd})
+		res, err := haiku.FindWithOpt(arg, r, opt)
 		if err != nil {
 			log.Println(err)
 			continue
