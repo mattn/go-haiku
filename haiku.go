@@ -92,6 +92,9 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
+		if len(c) < 7 {
+			return false
+		}
 		y := c[6]
 		if y == "*" {
 			y = tok.Surface
@@ -173,6 +176,9 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
+		if len(c) < 7 {
+			continue
+		}
 		y := c[6]
 		if y == "*" {
 			y = tok.Surface
