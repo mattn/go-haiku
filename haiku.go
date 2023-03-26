@@ -16,6 +16,10 @@ var (
 	reKana       = regexp.MustCompile(`[ァ-タダ-ヶ]`)
 )
 
+type Opt struct {
+	Udic *dict.Dict
+}
+
 func isEnd(c []string) bool {
 	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用") && c[5] != "未然形"
 }
@@ -51,6 +55,9 @@ func countChars(s string) int {
 
 // Match return true when text matches with rule(s).
 func Match(text string, rule []int) bool {
+	if len(rule) == 0 {
+		return false
+	}
 	t, err := tokenizer.New(ipa.Dict(), tokenizer.OmitBosEos())
 	if err != nil {
 		return false
@@ -92,8 +99,54 @@ func Match(text string, rule []int) bool {
 	return false
 }
 
-type Opt struct {
-	Udic *dict.Dict
+// Match return true when text matches with rule(s).
+func MatchWithOpt(text string, rule []int, opt *Opt) bool {
+	if len(rule) == 0 {
+		return false
+	}
+	d := opt.Udic
+	if d == nil {
+		d = ipa.Dict()
+	}
+	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
+	if err != nil {
+		return false
+	}
+	text = reIgnoreText.ReplaceAllString(text, " ")
+	tokens := t.Tokenize(text)
+	pos := 0
+	r := make([]int, len(rule))
+	copy(r, rule)
+
+	for i := 0; i < len(tokens); i++ {
+		tok := tokens[i]
+		c := tok.Features()
+		if len(c) == 0 || isSpace(c) {
+			continue
+		}
+		y := c[len(c)-1]
+		if y == "*" {
+			y = tok.Surface
+		}
+		if !reWord.MatchString(y) {
+			if y == "、" {
+				continue
+			}
+			return false
+		}
+		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(c)) {
+			return false
+		}
+		n := countChars(y)
+		r[pos] -= n
+		if r[pos] == 0 {
+			pos++
+			if pos == len(r) && i == len(tokens)-1 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
