@@ -25,7 +25,7 @@ func isEnd(c []string) bool {
 }
 
 func isSpace(c []string) bool {
-	return c[1] == "空白"
+	return c[0] == "空白"
 }
 
 // isWord return true when the kind of the word is possible to be leading of
@@ -35,6 +35,9 @@ func isWord(c []string) bool {
 		if f == c[0] && c[1] != "非自立" && c[1] != "接尾" {
 			return true
 		}
+	}
+	if c[0] == "記号" && c[1] == "一般" {
+		return true
 	}
 	if c[0] == "助詞" && c[1] != "服助詞" {
 		return true
@@ -67,7 +70,7 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	if d == nil {
 		d = uni.Dict()
 	}
-	t, err := tokenizer.New(d, tokenizer.Nop())
+	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
 	if err != nil {
 		return false
 	}
@@ -77,13 +80,19 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	r := make([]int, len(rule))
 	copy(r, rule)
 
+	var tmp []tokenizer.Token
+	for _, token := range tokens {
+		c := token.Features()
+		if len(c) > 0 && c[0] != "空白" {
+			tmp = append(tmp, token)
+		}
+	}
+	tokens = tmp
+
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
-		if len(c) == 0 || isSpace(c) {
-			continue
-		}
-		y := c[len(c)-1]
+		y := c[6]
 		if y == "*" {
 			y = tok.Surface
 		}
@@ -116,7 +125,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	if d == nil {
 		d = uni.Dict()
 	}
-	t, err := tokenizer.New(d, tokenizer.Nop())
+	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +137,15 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	sentence := ""
 	start := 0
 	ambigous := 0
+
+	var tmp []tokenizer.Token
+	for _, token := range tokens {
+		c := token.Features()
+		if len(c) > 0 && c[0] != "空白" {
+			tmp = append(tmp, token)
+		}
+	}
+	tokens = tmp
 
 	for i := 0; i < len(tokens); i++ {
 		if reKana.MatchString(tokens[i].Surface) {
@@ -155,10 +173,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
-		if len(c) == 0 || isSpace(c) {
-			continue
-		}
-		y := c[len(c)-1]
+		y := c[6]
 		if y == "*" {
 			y = tok.Surface
 		}
