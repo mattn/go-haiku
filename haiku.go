@@ -36,10 +36,13 @@ func isWord(c []string) bool {
 			return true
 		}
 	}
+	if c[0] == "代名詞" {
+		return true
+	}
 	if c[0] == "記号" && c[1] == "一般" {
 		return true
 	}
-	if c[0] == "助詞" && c[1] != "服助詞" {
+	if c[0] == "助詞" && c[1] != "副助詞" {
 		return true
 	}
 	if c[0] == "動詞" && c[1] != "接尾" {
@@ -95,7 +98,12 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		if len(c) < 7 {
 			return false
 		}
-		y := c[6]
+		var y string
+		if len(c) < 10 {
+			y = c[6]
+		} else {
+			y = c[9]
+		}
 		if y == "*" {
 			y = tok.Surface
 		}
@@ -179,7 +187,12 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		if len(c) < 7 {
 			continue
 		}
-		y := c[6]
+		var y string
+		if len(c) < 10 {
+			y = c[6]
+		} else {
+			y = c[9]
+		}
 		if y == "*" {
 			y = tok.Surface
 		}
