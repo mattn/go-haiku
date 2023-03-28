@@ -11,7 +11,7 @@ import (
 
 var (
 	reWord       = regexp.MustCompile(`^[ァ-ヾ]+$`)
-	reIgnoreText = regexp.MustCompile(`[\[\]「」『』]`)
+	reIgnoreText = regexp.MustCompile(`[\[\]「」『』、。]`)
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
 	reKana       = regexp.MustCompile(`[ァ-タダ-ヶ]`)
 )
