@@ -98,17 +98,18 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
 		c := tok.Features()
-		if len(c) < 7 {
-			return false
-		}
 		var y string
-		if len(c) < 10 {
-			y = c[6]
-		} else {
-			y = c[9]
-		}
-		if y == "*" {
+		if len(c) < 7 {
 			y = tok.Surface
+		} else {
+			if len(c) < 10 {
+				y = c[6]
+			} else {
+				y = c[9]
+			}
+			if y == "*" {
+				y = tok.Surface
+			}
 		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
@@ -191,13 +192,17 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 			continue
 		}
 		var y string
-		if len(c) < 10 {
-			y = c[6]
-		} else {
-			y = c[9]
-		}
-		if y == "*" {
+		if len(c) < 7 {
 			y = tok.Surface
+		} else {
+			if len(c) < 10 {
+				y = c[6]
+			} else {
+				y = c[9]
+			}
+			if y == "*" {
+				y = tok.Surface
+			}
 		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
