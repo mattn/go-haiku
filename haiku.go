@@ -24,8 +24,8 @@ func isEnd(c []string) bool {
 	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用") && c[5] != "未然形"
 }
 
-func isSpace(c []string) bool {
-	return c[0] == "空白"
+func isIgnore(c []string) bool {
+	return len(c) > 0 && (c[0] == "空白" || c[0] == "補助記号")
 }
 
 // isWord return true when the kind of the word is possible to be leading of
@@ -89,7 +89,7 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	var tmp []tokenizer.Token
 	for _, token := range tokens {
 		c := token.Features()
-		if len(c) > 0 && c[0] != "空白" {
+		if !isIgnore(c) {
 			tmp = append(tmp, token)
 		}
 	}
@@ -156,7 +156,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	var tmp []tokenizer.Token
 	for _, token := range tokens {
 		c := token.Features()
-		if len(c) > 0 && c[0] != "空白" {
+		if !isIgnore(c) {
 			tmp = append(tmp, token)
 		}
 	}
