@@ -39,7 +39,7 @@ func isWord(c []string) bool {
 	if c[0] == "接頭辞" {
 		return true
 	}
-	if c[0] == "形状詞" {
+	if c[0] == "形状詞" && c[1] != "助動詞語幹" {
 		return true
 	}
 	if c[0] == "代名詞" {
