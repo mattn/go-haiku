@@ -36,6 +36,9 @@ func isWord(c []string) bool {
 			return true
 		}
 	}
+	if c[0] == "接頭辞" {
+		return true
+	}
 	if c[0] == "形状詞" {
 		return true
 	}
