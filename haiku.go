@@ -105,7 +105,9 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		if len(c) < 7 {
 			y = tok.Surface
 		} else {
-			if len(c) < 10 {
+			if reKana.MatchString(tok.Surface) {
+				y = tok.Surface
+			} else if len(c) < 10 {
 				y = c[6]
 			} else {
 				y = c[9]
@@ -198,7 +200,9 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		if len(c) < 7 {
 			y = tok.Surface
 		} else {
-			if len(c) < 10 {
+			if reKana.MatchString(tok.Surface) {
+				y = tok.Surface
+			} else if len(c) < 10 {
 				y = c[6]
 			} else {
 				y = c[9]
