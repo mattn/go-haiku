@@ -36,9 +36,6 @@ func isWord(c []string) bool {
 			return true
 		}
 	}
-	if c[0] == "接頭辞" {
-		return true
-	}
 	if c[0] == "形状詞" && c[1] != "助動詞語幹" {
 		return true
 	}
@@ -48,7 +45,7 @@ func isWord(c []string) bool {
 	if c[0] == "記号" && c[1] == "一般" {
 		return true
 	}
-	if c[0] == "助詞" && c[1] != "副助詞" && c[1] != "準体助詞" && c[1] != "終助詞" && c[1] != "係助詞" && c[1] != "格助詞" && c[1] != "接続助詞" {
+	if c[0] == "助詞" && c[1] != "副助詞" && c[1] != "準体助詞" && c[1] != "終助詞" && c[1] != "格助詞" && c[1] != "接続助詞" {
 		return true
 	}
 	if c[0] == "動詞" && c[1] != "接尾" {
@@ -67,7 +64,7 @@ func countChars(s string) int {
 
 // Match return true when text matches with rule(s).
 func Match(text string, rule []int) bool {
-	return MatchWithOpt(text, rule, nil)
+	return MatchWithOpt(text, rule, &Opt{})
 }
 
 // MatchWithOpt return true when text matches with rule(s).
@@ -260,6 +257,6 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 
 // Find returns sentences that text matches with rule(s).
 func Find(text string, rule []int) []string {
-	res, _ := FindWithOpt(text, rule, nil)
+	res, _ := FindWithOpt(text, rule, &Opt{})
 	return res
 }
