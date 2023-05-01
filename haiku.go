@@ -25,7 +25,7 @@ func isEnd(c []string) bool {
 }
 
 func isIgnore(c []string) bool {
-	return len(c) > 0 && (c[0] == "空白" || c[0] == "補助記号")
+	return len(c) > 0 && (c[0] == "空白" || c[0] == "補助記号" || (c[0] == "記号" && c[1] == "空白"))
 }
 
 // isWord return true when the kind of the word is possible to be leading of
@@ -99,17 +99,13 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		tok := tokens[i]
 		c := tok.Features()
 		var y string
-		if len(c) < 7 {
+		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			if reKana.MatchString(tok.Surface) {
-				y = tok.Surface
-			} else if len(c) < 10 {
-				y = c[6]
+			idx := int(d.ContentsMeta[dict.ReadingIndex])
+			if idx < len(c) {
+				y = c[idx]
 			} else {
-				y = c[9]
-			}
-			if y == "*" {
 				y = tok.Surface
 			}
 		}
@@ -194,17 +190,13 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 			continue
 		}
 		var y string
-		if len(c) < 7 {
+		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			if reKana.MatchString(tok.Surface) {
-				y = tok.Surface
-			} else if len(c) < 10 {
-				y = c[6]
+			idx := int(d.ContentsMeta[dict.ReadingIndex])
+			if idx < len(c) {
+				y = c[idx]
 			} else {
-				y = c[9]
-			}
-			if y == "*" {
 				y = tok.Surface
 			}
 		}
