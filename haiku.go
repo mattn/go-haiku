@@ -102,8 +102,13 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			idx := int(d.ContentsMeta[dict.ReadingIndex])
-			if idx < len(c) {
+			var idx int
+			if ii, ok := d.ContentsMeta[dict.PronunciationIndex]; ok {
+				idx = int(ii)
+			} else {
+				idx = -1
+			}
+			if idx >= 0 && idx < len(c) {
 				y = c[idx]
 			} else {
 				y = tok.Surface
@@ -193,8 +198,13 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			idx := int(d.ContentsMeta[dict.ReadingIndex])
-			if idx < len(c) {
+			var idx int
+			if ii, ok := d.ContentsMeta[dict.PronunciationIndex]; ok {
+				idx = int(ii)
+			} else {
+				idx = -1
+			}
+			if idx >= 0 && idx < len(c) {
 				y = c[idx]
 			} else {
 				y = tok.Surface
