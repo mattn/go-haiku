@@ -77,6 +77,7 @@ func main() {
 	u := flag.String("u", "", "handle as URL")
 	d := flag.String("d", "", "user dic")
 	m := flag.Bool("m", false, "check matched")
+	v := flag.Bool("V", false, "verbose")
 	rs := flag.String("r", "5,7,5", "rule of match (default: 5,7,5)")
 	flag.Parse()
 
@@ -107,7 +108,7 @@ func main() {
 		args = []string{s}
 	}
 
-	opt := &haiku.Opt{}
+	opt := &haiku.Opt{Debug: *v}
 	if *d != "" {
 		dd, err := dict.LoadShrink(*d)
 		if err != nil {

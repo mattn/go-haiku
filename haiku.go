@@ -1,6 +1,8 @@
 package haiku
 
 import (
+	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -17,7 +19,8 @@ var (
 )
 
 type Opt struct {
-	Udic *dict.Dict
+	Udic  *dict.Dict
+	Debug bool
 }
 
 func isEnd(c []string) bool {
@@ -113,6 +116,9 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 			} else {
 				y = tok.Surface
 			}
+		}
+		if opt.Debug {
+			fmt.Fprintln(os.Stderr, c, y)
 		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
