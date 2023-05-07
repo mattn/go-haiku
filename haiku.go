@@ -15,7 +15,7 @@ var (
 	reWord       = regexp.MustCompile(`^[ァ-ヾ]+$`)
 	reIgnoreText = regexp.MustCompile(`[\[\]「」『』、。？！]`)
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
-	reKana       = regexp.MustCompile(`[ァ-タダ-ヶ]`)
+	reKana       = regexp.MustCompile(`^[ァ-タダ-ヶ]+$`)
 )
 
 type Opt struct {
@@ -23,21 +23,68 @@ type Opt struct {
 	Debug bool
 }
 
-func isEnd(c []string) bool {
-	return c[1] != "非自立" && !strings.HasPrefix(c[5], "連用") && c[5] != "未然形"
+func dictIdx(d *dict.Dict, typ string) int {
+	if ii, ok := d.ContentsMeta[typ]; ok {
+		return int(ii)
+	}
+	return -1
 }
 
-func isIgnore(c []string) bool {
+func contains(c []string, s string) bool {
+	for _, cc := range c {
+		if cc == s {
+			return true
+		}
+	}
+	return false
+}
+
+func isEnd(d *dict.Dict, c []string) bool {
+	idx := dictIdx(d, dict.PronunciationIndex)
+	if c[0] == "接頭辞" {
+		if idx >= 0 && contains(c, "御") {
+			return false
+		}
+		return true
+	}
+	if c[1] == "非自立" {
+		if c[0] == "名詞" {
+			return true
+		}
+		if c[0] == "動詞" {
+			return true
+		}
+		if idx >= 0 && c[idx] == "ノ" {
+			return true
+		}
+		return false
+	}
+	idx = dictIdx(d, dict.InflectionalForm)
+	if idx >= 0 {
+		if c[idx] == "未然形" {
+			return false
+		}
+		//if strings.HasPrefix(c[idx], "連用") {
+		//	return false
+		//}
+	}
+	return true
+}
+
+func isIgnore(d *dict.Dict, c []string) bool {
 	return len(c) > 0 && (c[0] == "空白" || c[0] == "補助記号" || (c[0] == "記号" && c[1] == "空白"))
 }
 
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
-func isWord(c []string) bool {
+func isWord(d *dict.Dict, c []string) bool {
 	for _, f := range []string{"名詞", "形容詞", "形容動詞", "副詞", "連体詞", "接続詞", "感動詞", "接頭詞", "フィラー"} {
 		if f == c[0] && c[1] != "接尾" {
 			return true
 		}
+	}
+	if c[0] == "接頭辞" || (c[0] == "接続詞" && c[1] == "名詞接続") {
+		return false
 	}
 	if c[0] == "形状詞" && c[1] != "助動詞語幹" {
 		return true
@@ -48,7 +95,7 @@ func isWord(c []string) bool {
 	if c[0] == "記号" && c[1] == "一般" {
 		return true
 	}
-	if c[0] == "助詞" && c[1] != "副助詞" && c[1] != "準体助詞" && c[1] != "終助詞" && c[1] != "係助詞" && c[1] != "格助詞" && c[1] != "接続助詞" {
+	if c[0] == "助詞" && c[1] != "副助詞" && c[1] != "準体助詞" && c[1] != "終助詞" && /*c[1] != "係助詞" &&*/ c[1] != "格助詞" && c[1] != "接続助詞" {
 		return true
 	}
 	if c[0] == "動詞" && c[1] != "接尾" && c[1] != "非自立" {
@@ -92,7 +139,7 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	var tmp []tokenizer.Token
 	for _, token := range tokens {
 		c := token.Features()
-		if !isIgnore(c) {
+		if !isIgnore(d, c) {
 			tmp = append(tmp, token)
 		}
 	}
@@ -105,12 +152,7 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			var idx int
-			if ii, ok := d.ContentsMeta[dict.PronunciationIndex]; ok {
-				idx = int(ii)
-			} else {
-				idx = -1
-			}
+			idx := dictIdx(d, dict.PronunciationIndex)
 			if idx >= 0 && idx < len(c) {
 				y = c[idx]
 			} else {
@@ -126,12 +168,15 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 			}
 			return false
 		}
-		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(c)) {
+		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(d, c)) {
 			return false
 		}
 		n := countChars(y)
 		r[pos] -= n
 		if r[pos] == 0 {
+			if !isEnd(d, c) {
+				return false
+			}
 			pos++
 			if pos == len(r) && i == len(tokens)-1 {
 				return true
@@ -165,7 +210,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	var tmp []tokenizer.Token
 	for _, token := range tokens {
 		c := token.Features()
-		if !isIgnore(c) {
+		if !isIgnore(d, c) {
 			tmp = append(tmp, token)
 		}
 	}
@@ -204,12 +249,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
 		} else {
-			var idx int
-			if ii, ok := d.ContentsMeta[dict.PronunciationIndex]; ok {
-				idx = int(ii)
-			} else {
-				idx = -1
-			}
+			idx := dictIdx(d, dict.PronunciationIndex)
 			if idx >= 0 && idx < len(c) {
 				y = c[idx]
 			} else {
@@ -226,7 +266,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 			copy(r, rule)
 			continue
 		}
-		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(c)) {
+		if pos >= len(rule) || (r[pos] == rule[pos] && !isWord(d, c)) {
 			pos = 0
 			ambigous = 0
 			sentence = ""
@@ -240,7 +280,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		if r[pos] >= 0 && (r[pos] == 0 || r[pos]+ambigous == 0) {
 			pos++
 			if pos == len(r) || pos == len(r)+1 {
-				if isEnd(c) {
+				if isEnd(d, c) {
 					ret = append(ret, sentence)
 					start = i + 1
 				}

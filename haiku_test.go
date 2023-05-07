@@ -20,7 +20,7 @@ func testMatch(t *testing.T, filename string, rules []int, judge bool) {
 		if strings.HasPrefix(text, "#") {
 			continue
 		}
-		if Match(text, rules) != judge {
+		if MatchWithOpt(text, rules, &Opt{Debug: true}) != judge {
 			t.Fatalf("%q for %q must be %v", text, filename, rules)
 		}
 	}
