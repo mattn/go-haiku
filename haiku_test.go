@@ -20,7 +20,8 @@ func testMatch(t *testing.T, filename string, rules []int, judge bool) {
 		if strings.HasPrefix(text, "#") {
 			continue
 		}
-		if MatchWithOpt(text, rules, &Opt{Debug: true}) != judge {
+		t.Logf("%s (%v:%v)", text, filename, judge)
+		if MatchWithOpt(text, rules, &Opt{Debug: testing.Verbose()}) != judge {
 			t.Fatalf("%q for %q must be %v", text, filename, rules)
 		}
 	}
