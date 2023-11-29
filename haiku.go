@@ -78,9 +78,9 @@ func isIgnore(d *dict.Dict, c []string) bool {
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
 func isWord(d *dict.Dict, c []string) bool {
-    if c[0] == "非自立" {
-        return false
-    }
+	if c[1] == "非自立" {
+		return false
+	}
 	for _, f := range []string{"名詞", "形容詞", "形容動詞", "副詞", "連体詞", "接続詞", "感動詞", "接頭詞", "フィラー"} {
 		if f == c[0] && c[1] != "接尾" {
 			return true
