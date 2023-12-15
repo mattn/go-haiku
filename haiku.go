@@ -61,7 +61,7 @@ func isEnd(d *dict.Dict, c []string) bool {
 		return false
 	}
 	idx = dictIdx(d, dict.InflectionalForm)
-	if idx >= 0 {
+	if idx >= 0 && idx < len(c) {
 		if c[idx] == "未然形" {
 			return false
 		}
@@ -159,6 +159,8 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 		var y string
 		if reKana.MatchString(tok.Surface) {
 			y = tok.Surface
+		} else if len(c) == 3 {
+			y = c[2]
 		} else {
 			idx := dictIdx(d, dict.PronunciationIndex)
 			if idx >= 0 && idx < len(c) {
