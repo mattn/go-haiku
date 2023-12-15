@@ -114,7 +114,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		opt.Udic = dd
+		opt.Dict = dd
 	}
 	for _, arg := range args {
 		if *m {

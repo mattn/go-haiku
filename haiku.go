@@ -19,8 +19,9 @@ var (
 )
 
 type Opt struct {
-	Udic  *dict.Dict
-	Debug bool
+	Dict     *dict.Dict
+	UserDict *dict.UserDict
+	Debug    bool
 }
 
 func dictIdx(d *dict.Dict, typ string) int {
@@ -125,11 +126,15 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	if len(rule) == 0 {
 		return false
 	}
-	d := opt.Udic
+	d := opt.Dict
 	if d == nil {
 		d = uni.Dict()
 	}
-	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
+	opts := []tokenizer.Option{tokenizer.OmitBosEos()}
+	if opt.UserDict != nil {
+		opts = append(opts, tokenizer.UserDict(opt.UserDict))
+	}
+	t, err := tokenizer.New(d, opts...)
 	if err != nil {
 		return false
 	}
@@ -193,11 +198,15 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	if len(rule) == 0 {
 		return nil, nil
 	}
-	d := opt.Udic
+	d := opt.Dict
 	if d == nil {
 		d = uni.Dict()
 	}
-	t, err := tokenizer.New(d, tokenizer.OmitBosEos())
+	opts := []tokenizer.Option{tokenizer.OmitBosEos()}
+	if opt.UserDict != nil {
+		opts = append(opts, tokenizer.UserDict(opt.UserDict))
+	}
+	t, err := tokenizer.New(d, opts...)
 	if err != nil {
 		return nil, err
 	}
