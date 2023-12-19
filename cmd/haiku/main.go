@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/ikawaha/kagome-dict/dict"
+	"github.com/ikawaha/kagome-dict/uni"
 	"github.com/mattn/go-encoding"
 	"github.com/mattn/go-haiku"
 	"golang.org/x/net/html"
@@ -108,13 +109,13 @@ func main() {
 		args = []string{s}
 	}
 
-	opt := &haiku.Opt{Debug: *v}
+	opt := &haiku.Opt{Dict: uni.Dict(), Debug: *v}
 	if *d != "" {
-		dd, err := dict.LoadShrink(*d)
+		dd, err := dict.NewUserDict(*d)
 		if err != nil {
 			log.Fatal(err)
 		}
-		opt.Dict = dd
+		opt.UserDict = dd
 	}
 	for _, arg := range args {
 		if *m {

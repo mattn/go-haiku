@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/ikawaha/kagome-dict/dict"
-	"github.com/ikawaha/kagome-dict/uni"
 	"github.com/ikawaha/kagome/v2/tokenizer"
 )
 
@@ -16,12 +15,18 @@ var (
 	reIgnoreText = regexp.MustCompile(`[\[\]「」『』、。？！]`)
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
 	reKana       = regexp.MustCompile(`^[ァ-タダ-ヶ]+$`)
+
+	globalDict *dict.Dict
 )
 
 type Opt struct {
 	Dict     *dict.Dict
 	UserDict *dict.UserDict
 	Debug    bool
+}
+
+func UseDict(d *dict.Dict) {
+	globalDict = d
 }
 
 func dictIdx(d *dict.Dict, typ string) int {
@@ -128,7 +133,10 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	}
 	d := opt.Dict
 	if d == nil {
-		d = uni.Dict()
+		d = globalDict
+	}
+	if d == nil {
+		panic("dict is nil")
 	}
 	opts := []tokenizer.Option{tokenizer.OmitBosEos()}
 	if opt.UserDict != nil {
@@ -202,7 +210,10 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	}
 	d := opt.Dict
 	if d == nil {
-		d = uni.Dict()
+		d = globalDict
+	}
+	if d == nil {
+		panic("dict is nil")
 	}
 	opts := []tokenizer.Option{tokenizer.OmitBosEos()}
 	if opt.UserDict != nil {

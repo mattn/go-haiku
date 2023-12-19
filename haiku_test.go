@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ikawaha/kagome-dict/uni"
 )
 
 func testMatch(t *testing.T, filename string, rules []int, judge bool) {
@@ -14,6 +16,11 @@ func testMatch(t *testing.T, filename string, rules []int, judge bool) {
 		log.Fatal(err)
 	}
 	defer f.Close()
+
+	opts := &Opt{
+		Dict:  uni.Dict(),
+		Debug: testing.Verbose(),
+	}
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -21,7 +28,7 @@ func testMatch(t *testing.T, filename string, rules []int, judge bool) {
 			continue
 		}
 		t.Logf("%s (%v:%v)", text, filename, judge)
-		if MatchWithOpt(text, rules, &Opt{Debug: testing.Verbose()}) != judge {
+		if MatchWithOpt(text, rules, opts) != judge {
 			t.Fatalf("%q for %q must be %v", text, filename, rules)
 		}
 	}
