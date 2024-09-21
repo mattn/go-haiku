@@ -2,6 +2,7 @@ package haiku
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -20,9 +21,10 @@ var (
 )
 
 type Opt struct {
-	Dict     *dict.Dict
-	UserDict *dict.UserDict
-	Debug    bool
+	Dict        *dict.Dict
+	UserDict    *dict.UserDict
+	Debug       bool
+	DebugWriter io.Writer
 }
 
 func UseDict(d *dict.Dict) {
@@ -178,7 +180,11 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 			}
 		}
 		if opt.Debug {
-			fmt.Fprintln(os.Stderr, c, y)
+			if opt.DebugWriter != nil {
+				fmt.Fprintln(opt.DebugWriter, c, y)
+			} else {
+				fmt.Fprintln(os.Stderr, c, y)
+			}
 		}
 		if !reWord.MatchString(y) {
 			if y == "、" {
