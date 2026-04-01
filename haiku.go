@@ -48,6 +48,9 @@ func contains(c []string, s string) bool {
 }
 
 func isEnd(d *dict.Dict, c []string) bool {
+	if len(c) < 2 {
+		return true
+	}
 	idx := dictIdx(d, dict.PronunciationIndex)
 	if c[0] == "接頭辞" {
 		if idx >= 0 && contains(c, "御") {
@@ -80,12 +83,15 @@ func isEnd(d *dict.Dict, c []string) bool {
 }
 
 func isIgnore(d *dict.Dict, c []string) bool {
-	return len(c) > 0 && (c[0] == "空白" || c[0] == "補助記号" || (c[0] == "記号" && c[1] == "空白"))
+	return len(c) > 1 && (c[0] == "空白" || c[0] == "補助記号" || (c[0] == "記号" && c[1] == "空白"))
 }
 
 // isWord return true when the kind of the word is possible to be leading of
 // sentence.
 func isWord(d *dict.Dict, c []string) bool {
+	if len(c) < 2 {
+		return false
+	}
 	if c[0] != "名詞" && c[1] == "非自立" {
 		return false
 	}
