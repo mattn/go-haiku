@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -88,7 +87,7 @@ func main() {
 	}
 	args := flag.Args()
 	if len(args) == 0 && *u == "" {
-		b, err := ioutil.ReadAll(os.Stdin)
+		b, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			log.Fatal(err)
 		}
