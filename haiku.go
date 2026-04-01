@@ -271,7 +271,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 				}
 			}
 			tokens = tokens[:len(tokens)-(j-i)+1]
-			i = j
+			i--
 		}
 	}
 
