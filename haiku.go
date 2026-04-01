@@ -316,7 +316,7 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 		sentence += tok.Surface
 		if r[pos] >= 0 && (r[pos] == 0 || r[pos]+ambigous == 0) {
 			pos++
-			if pos == len(r) || pos == len(r)+1 {
+			if pos == len(r) {
 				if isEnd(d, c) {
 					ret = append(ret, sentence)
 					start = i + 1
