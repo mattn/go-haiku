@@ -58,6 +58,9 @@ func isEnd(d *dict.Dict, c []string) bool {
 		}
 		return true
 	}
+	if c[0] == "接頭詞" {
+		return false
+	}
 	if c[1] == "非自立" {
 		if c[0] == "名詞" {
 			return true
