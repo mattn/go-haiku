@@ -16,6 +16,12 @@ var (
 	reIgnoreText = regexp.MustCompile(`[\[\]「」『』、。？！]`)
 	reIgnoreChar = regexp.MustCompile(`[ァィゥェォャュョ]`)
 	reKana       = regexp.MustCompile(`^[ァ-タダ-ヶ]+$`)
+	// Emoji, brackets and other symbols which most dictionaries have no reading for
+	reSymbols    = regexp.MustCompile(`^[\p{So}\x{FE0F}\x{200D}\x{1F3FB}-\x{1F3FF}〜～（）()]+$`)
+	reDigitComma = regexp.MustCompile(`([0-9０-９])[,，]([0-9０-９]{3})`)
+	reDigits     = regexp.MustCompile(`^[0-9０-９]+$`)
+	reAcronym    = regexp.MustCompile(`^(?:[A-Z]{1,4}|[Ａ-Ｚ]{1,4})$`)
+	reHiragana   = regexp.MustCompile(`^[ぁ-ゖー]+$`)
 
 	globalDict *dict.Dict
 )
@@ -157,37 +163,15 @@ func MatchWithOpt(text string, rule []int, opt *Opt) bool {
 	if err != nil {
 		return false
 	}
-	text = reIgnoreText.ReplaceAllString(text, " ")
-	tokens := t.Tokenize(text)
+	tokens := tokenize(t, d, text)
 	pos := 0
 	r := make([]int, len(rule))
 	copy(r, rule)
 
-	var tmp []tokenizer.Token
-	for _, token := range tokens {
-		c := token.Features()
-		if !isIgnore(d, c) {
-			tmp = append(tmp, token)
-		}
-	}
-	tokens = tmp
-
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
-		c := tok.Features()
-		var y string
-		if reKana.MatchString(tok.Surface) {
-			y = tok.Surface
-		} else if len(c) == 3 {
-			y = c[2]
-		} else {
-			idx := dictIdx(d, dict.PronunciationIndex)
-			if idx >= 0 && idx < len(c) {
-				y = c[idx]
-			} else {
-				y = tok.Surface
-			}
-		}
+		c := tok.Features
+		y := reading(d, tok)
 		if opt.Debug {
 			if opt.DebugWriter != nil {
 				fmt.Fprintln(opt.DebugWriter, c, y)
@@ -238,23 +222,13 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	text = reIgnoreText.ReplaceAllString(text, " ")
-	tokens := t.Tokenize(text)
+	tokens := tokenize(t, d, text)
 	pos := 0
 	r := make([]int, len(rule))
 	copy(r, rule)
 	sentence := ""
 	start := 0
 	ambigous := 0
-
-	var tmp []tokenizer.Token
-	for _, token := range tokens {
-		c := token.Features()
-		if !isIgnore(d, c) {
-			tmp = append(tmp, token)
-		}
-	}
-	tokens = tmp
 
 	for i := 0; i < len(tokens); i++ {
 		if reKana.MatchString(tokens[i].Surface) {
@@ -281,21 +255,11 @@ func FindWithOpt(text string, rule []int, opt *Opt) ([]string, error) {
 	ret := []string{}
 	for i := 0; i < len(tokens); i++ {
 		tok := tokens[i]
-		c := tok.Features()
-		if len(c) < 7 {
+		c := tok.Features
+		if len(c) < 7 && !tok.number {
 			continue
 		}
-		var y string
-		if reKana.MatchString(tok.Surface) {
-			y = tok.Surface
-		} else {
-			idx := dictIdx(d, dict.PronunciationIndex)
-			if idx >= 0 && idx < len(c) {
-				y = c[idx]
-			} else {
-				y = tok.Surface
-			}
-		}
+		y := reading(d, tok)
 		if !reWord.MatchString(y) {
 			if y == "、" {
 				continue
